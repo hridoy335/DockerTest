@@ -1,0 +1,38 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    ports:
+      - "8080:8080"
+
+    depends_on:
+      - postgres
+      - redis
+
+  postgres:
+    image: postgres:18
+
+    environment:
+      POSTGRES_DB: testdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql
+   
+  redis:
+    image: redis:8
+
+    ports:
+      - "6379:6379"
+
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+
+
+volumes:
+  postgres_data:
