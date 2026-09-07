@@ -17,7 +17,6 @@ namespace DockerTestProject.Controllers
         }
 
         // GET: api/product  
-        //update 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
