@@ -16,7 +16,7 @@ namespace DockerTestProject.Controllers
             _dbContext = dbContext;
         }
 
-        // GET: api/product  
+        // GET: api/product   
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {

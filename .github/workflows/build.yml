@@ -36,4 +36,4 @@ jobs:
       with:
         context: .
         push: true
-        tags: hridoyroy335/dockertest:latest
+        tags: hridoy335/dockertest:latest
