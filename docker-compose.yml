@@ -1,38 +1,39 @@
 services:
-  api:
-    build:
-      context: .
-      dockerfile: Dockerfile
-
-    ports:
-      - "8080:8080"
-
-    depends_on:
-      - postgres
-      - redis
 
   postgres:
     image: postgres:18
-
+    container_name: dockertest-postgres
     environment:
       POSTGRES_DB: testdb
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-
     ports:
-      - "5432:5432"
-
+      - "5433:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql
-   
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d testdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   redis:
     image: redis:8
-
+    container_name: dockertest-redis
     ports:
       - "6379:6379"
-
     command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
 
+  api:
+    image: hridoy335/dockertest:latest
+    container_name: dockertest-api
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
 
 volumes:
   postgres_data:
