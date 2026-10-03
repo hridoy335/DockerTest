@@ -3,6 +3,7 @@ services:
   postgres:
     image: postgres:18
     container_name: dockertest-postgres
+    restart: unless-stopped
     environment:
       POSTGRES_DB: testdb
       POSTGRES_USER: postgres
@@ -10,7 +11,8 @@ services:
     ports:
       - "5433:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d testdb"]
       interval: 5s
@@ -20,20 +22,31 @@ services:
   redis:
     image: redis:8
     container_name: dockertest-redis
+    restart: unless-stopped
     ports:
       - "6379:6379"
     command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
   api:
     image: hridoy335/dockertest:latest
     container_name: dockertest-api
+    restart: unless-stopped
     ports:
       - "8080:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=testdb;Username=postgres;Password=postgres"
+      Redis__ConnectionString: "redis:6379"
     depends_on:
       postgres:
         condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_healthy
 
 volumes:
   postgres_data:
